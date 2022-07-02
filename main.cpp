@@ -2,6 +2,7 @@
 #include <vector>
 #include "histogram.h"
 #include "svg.h"
+#include <curl/curl.h>
 
 using namespace std;
 
@@ -90,7 +91,15 @@ show_histogram_text(const auto bins){
 }
 
 int
-main() {
+main(int argc, char* argv[]) {
+    if(argc > 1){
+        cout << "argc = " << argc <<'\n';
+        for(size_t i = 0; i < argc; i++){
+            cout << "argv[" << i << "]= " << argv[i] << '\n';
+        }
+        return 0;
+    }
+    curl_global_init(CURL_GLOBAL_ALL);
     const auto input = read_input(cin, true);
     const auto bins = make_histogram(input);
     show_histogram_svg(bins);
