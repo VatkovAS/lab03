@@ -97,7 +97,7 @@ write_data(void* items, size_t item_size, size_t item_count, void* ctx) {
     size_t data_size = item_size * item_count;
     stringstream* buffer = reinterpret_cast<stringstream*>(ctx);
     buffer->write(reinterpret_cast<const char*>(items), data_size);
-    return 0;
+    return data_size;
 }
 
 Input
