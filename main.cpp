@@ -11,6 +11,7 @@ using namespace std;
 struct Input {
     vector<double> numbers;
     size_t bin_count;
+    size_t number_count;
 };
 
 vector<double>
@@ -25,12 +26,10 @@ input_numbers(istream& in, size_t count) {
 Input
 read_input(istream& in, bool prompt) {
     Input data;
-
-    if (prompt)
-        cerr << "Enter number count: ";
     size_t number_count;
     in >> number_count;
-
+    if (prompt)
+        cerr << "Enter number count: ";
     if (prompt)
         cerr << "Enter numbers: ";
     data.numbers = input_numbers(in, number_count);
@@ -38,7 +37,7 @@ read_input(istream& in, bool prompt) {
     if (prompt)
         cerr << "Enter column count: ";
     in >> data.bin_count;
-
+    data.number_count = number_count;
     return data;
 }
 
@@ -108,13 +107,13 @@ download(const string& address) {
     if(curl) {
         CURLcode res;
         curl_easy_setopt(curl, CURLOPT_URL, address.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
         res = curl_easy_perform(curl);
-        if (res){
+        if (res!=CURLE_OK){
             cerr << curl_easy_strerror(res) << endl;
             exit(1);
         }
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
         curl_easy_cleanup(curl);
     }
     return read_input(buffer, false);
@@ -122,13 +121,38 @@ download(const string& address) {
 
 int
 main(int argc, char* argv[]) {
+
     Input input;
+    string format;
     if (argc > 1) {
-        input = download(argv[1]);
-    } else {
+
+        int URL_position = 0;
+        string option = "-format";
+        char* URL = "http://";
+        for (int i = 0; i < argc; i++){
+            if (option == argv[i]){
+                format = argv[i+1];
+            }
+        }
+        for (int i = 0; i < argc; i++){
+            if (strstr(argv[i],URL) !=NULL)
+                URL_position = i;
+        }
+        if (URL_position == 0){
+            cerr << "Incorrect input. URL not founded.";
+                return 0;
+        }
+        input = download(argv[URL_position]);
+    }
+    else {
         input = read_input(cin, true);
     }
 
     const auto bins = make_histogram(input);
-    show_histogram_svg(bins);
+    if (format == "svg")
+        show_histogram_text(bins);
+    if (format == "text")
+        show_histogram_svg(bins);
+    if (format == "")
+        cerr << "Please input format";
 }
