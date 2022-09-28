@@ -2,6 +2,11 @@
 #include <vector>
 #include "histogram.h"
 #include "svg.h"
+#include <curl/curl.h>
+#include <sstream>
+#include <string>
+#include <windows.h>
+
 
 using namespace std;
 
